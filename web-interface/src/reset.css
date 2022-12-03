@@ -54,14 +54,7 @@ body {
   text-align: left; /* 3 */
   background-color: #fff; /* 2 */
 }
-/*
-Suppress the focus outline on elements that cannot be accessed via keyboard.
-This prevents an unwanted focus outline from appearing around elements that might still respond to pointer events.
-Credit: https://github.com/suitcss/base
-*/
-[tabindex="-1"]:focus {
-  outline: none !important;
-}
+
 /* 
 Content grouping
 1. Add the correct box sizing in Firefox.
