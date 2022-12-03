@@ -6,6 +6,7 @@
 #include <NTPClient.h>
 #include <ESP8266WebServer.h>
 #include <WiFiUdp.h>
+#include <EEPROM.h>
 
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define MAX_DEVICES 4
@@ -18,8 +19,8 @@
 #define AP_PASS "123456789"
 
 struct WifiConfig {
-  const char * ssid;
-  const char * passphrase = 0;
+  String ssid;
+  String passphrase = emptyString;
 };
 
 WifiConfig wifiConfig;
@@ -28,7 +29,7 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
 WiFiUDP ntpUDP;
 
-unsigned long until = 1669464000; 
+unsigned long until = 1669464000;
 
 NTPClient timeClient(ntpUDP, "0.pl.pool.ntp.org", 3600, 60000);
 ESP8266WebServer server(80);
@@ -66,14 +67,17 @@ String timeCheck() {
 }
 
 bool tryToConnect() {
-  int n = WiFi.scanNetworks();
-  for (int i = 0; i < n; ++i) {
-    if (WiFi.SSID(i) == wifiConfig.ssid) {
-      WiFi.begin(wifiConfig.ssid, wifiConfig.passphrase);
-      return true;
-      break;
-    }
+  int c = 0;
+  Serial.println("Waiting for Wifi to connect");
+  WiFi.begin(wifiConfig.ssid, wifiConfig.passphrase);
+  while (c < 20) {
+    if (WiFi.status() == WL_CONNECTED) { return true; }
+    delay(500);
+    Serial.print(WiFi.status());
+    c++;
   }
+  Serial.println("");
+  Serial.println("Connect timed out");
   return false;
 }
 
@@ -82,6 +86,33 @@ IPAddress getIpToManage(bool isClient) {
     return WiFi.localIP();
   }
   return WiFi.softAPIP();
+}
+
+WifiConfig loadConfigFromEEPROM() {
+  WifiConfig newConfig;
+  newConfig.ssid = "";
+  for (int i = 0; i < 32; ++i) {
+    if (char(EEPROM.read(i)) == 0) break;
+    newConfig.ssid += char(EEPROM.read(i));
+  }
+  newConfig.passphrase = "";
+  for (int i = 32; i < 96; ++i) {
+    if (char(EEPROM.read(i)) == 0) break;
+    newConfig.passphrase += char(EEPROM.read(i));
+  }
+  return newConfig;
+}
+
+void storeConfigInEEPROM(WifiConfig config) {
+  Serial.println("clearing eeprom");
+  for (int i = 0; i < 96; ++i) { EEPROM.write(i, 0); }
+  for (int i = 0; i < config.ssid.length(); ++i) {
+    EEPROM.write(i, config.ssid[i]);
+  }
+  for (int i = 0; i < config.passphrase.length(); ++i) {
+    EEPROM.write(32 + i, config.passphrase[i]);
+  }
+  EEPROM.commit();
 }
 
 void setupDisplay() {
@@ -94,7 +125,8 @@ void setupDisplay() {
   curMessage[0] = newMessage[0] = '\0';
 }
 
-void handleWiFiScan(){
+void handleWiFiScan() {
+  Serial.println("handleWiFiScan");
   int n = WiFi.scanNetworks();
   String networksList = "{\"ssids\":[";
   for (int i = 0; i < n; ++i) {
@@ -104,22 +136,34 @@ void handleWiFiScan(){
   server.send(200, "application/json", networksList);
 }
 
-void handleWiFiGetCurrent(){
-  server.send(200, "application/json", "{\"ssid\": \"" + String(wifiConfig.ssid) + "\", \"passphrase\": \"" +  String(wifiConfig.passphrase) + "\"}");
+void handleWiFiGetCurrent() {
+  Serial.println("handleWiFiGetCurrent");
+  server.send(200, "application/json", "{\"ssid\": \"" + wifiConfig.ssid + "\", \"passphrase\": \"" + wifiConfig.passphrase + "\"}");
 }
 
-void handleWifiSet(){
+void handleWifiSet() {
+  Serial.println("handleWifiSet");
+
   if (!server.arg("ssid")) {
     server.send(400);
-    return; 
+    return;
   }
-  wifiConfig.ssid = server.arg("ssid").c_str();
-  wifiConfig.passphrase = server.arg("passphrase").c_str();
-  server.send(200);  
+  wifiConfig.ssid = server.arg("ssid");
+  wifiConfig.passphrase = server.arg("passphrase");
+
+  Serial.println("Store new credentials");
+  Serial.print("ssid:");
+  Serial.print(wifiConfig.ssid);
+  Serial.print("pass:");
+  Serial.println(wifiConfig.passphrase);
+  Serial.println("---");
+
+  storeConfigInEEPROM(wifiConfig);
+  server.send(200);
 }
 
 void setupServer() {
-  SPIFFS.begin();
+  WiFi.mode(WIFI_AP_STA);
   WiFi.softAP(AP_SSID, AP_PASS);
   server.on("/", HTTP_GET, handleHome);
   server.on("/api/wifi/scan", HTTP_GET, handleWiFiScan);
@@ -130,23 +174,38 @@ void setupServer() {
 }
 
 void setup() {
+  Serial.begin(115200);
+  Serial.println("");
+  Serial.println("Setup EEPROM");
+  EEPROM.begin(512);
+  delay(10);
+  Serial.println("Seup display");
   setupDisplay();
-  
-  WiFi.mode(WIFI_AP_STA);
+  Serial.println("Load config from eeprom");
+  wifiConfig = loadConfigFromEEPROM();
+  Serial.print("ssid:");
+  Serial.print(wifiConfig.ssid);
+  Serial.print("; pass:");
+  Serial.println(wifiConfig.passphrase);
+
+
+  Serial.println("Setup wireless things");
   setupServer();
 
-  bool isClient = tryToConnect();
-  IPAddress IP = getIpToManage(isClient);
+  Serial.println("tryToConnect");
+  bool connected = tryToConnect();
+  Serial.println(connected ? "connected" : "cant connect");
+  IPAddress IP = getIpToManage(connected);
 
-  if (isClient) {
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-    }
-  }
+  Serial.print("Ip to manage: ");
+  Serial.println(IP);
 
+  Serial.println("Time client begin");
   timeClient.begin();
 
-  sprintf(curMessage, "%s - %03d:%03d:%03d:%03d", (isClient ? "Client" : "Host"), IP[0], IP[1], IP[2], IP[3]);
+  sprintf(curMessage, "%s - %03d:%03d:%03d:%03d", (connected ? "Client" : "Host"), IP[0], IP[1], IP[2], IP[3]);
+  Serial.print("display set to: ");
+  Serial.println(curMessage);
 }
 
 void loop() {
