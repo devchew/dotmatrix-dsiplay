@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Access-Control-Allow-Origin: *
+
+{"ssids":[
+   "ssid-1",
+   "ssid-2",
+   "ssid-3",
+   "ssid-4",
+   "ssid-5",
+   "ssid-6"
+]}
