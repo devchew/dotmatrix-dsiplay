@@ -21,15 +21,18 @@ export const Display = () => {
   const [formStatus, setFormStatus] = useState(FormStatuses.waiting);
   const [mode, setMode] = useState(0);
   const [until, setUntil] = useState(0);
+  const [intensity, setIntensity] = useState(0);
 
   const changeMode = (e) => setMode(e.target.value);
   const untilChange = (e) => setUntil(stringDateToEpochTime(e.target.value));
+  const intensityChange = (e) => setIntensity(e.target.value);
 
   const submit = (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.set("until", until);
     formData.set("mode", mode);
+    formData.set("intensity", intensity);
     setFormStatus(FormStatuses.saving);
     displayConfigSet(formData)
       .then(() => setFormStatus(FormStatuses.ok))
@@ -40,6 +43,7 @@ export const Display = () => {
     displayConfigGet().then((config) => {
       setMode(config.mode);
       setUntil(config.until);
+      setIntensity(config.intensity);
     });
   }, []);
   return (
@@ -72,6 +76,18 @@ export const Display = () => {
               onChange={untilChange}
             />
           </label>
+          <br />
+          <label>
+          intensity
+            <input
+              name="intensity"
+              type="range"
+              min="0"
+              max="15"
+              value={intensity}
+              onChange={intensityChange}
+            />
+          </label>          
           <br />
           <button type="submit">Save</button>
         </form>

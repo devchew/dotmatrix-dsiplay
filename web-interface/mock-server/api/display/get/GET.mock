@@ -3,6 +3,7 @@ Content-Type: application/json; charset=utf-8
 Access-Control-Allow-Origin: *
 
 {
-   "mode": "0",
-   "until": "1670241600"
+   "mode": 0,
+   "until": 1670241600,
+   "intensity": 8
 }

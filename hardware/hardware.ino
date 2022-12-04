@@ -30,6 +30,7 @@ struct WifiConfig {
 struct DisplayConfig {
   int mode;
   int until;
+  int intensity = 8;
 };
 
 struct HttpConnectionStatus {

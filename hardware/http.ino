@@ -59,7 +59,7 @@ void handleWifiSet() {
 
 void handleDisplayGet() {
   Serial.println("handleDisplayGet");
-  server.send(200, "application/json", "{\"mode\": \"" + String(config.display.mode) + "\", \"until\": \"" + String(config.display.until) + "\"}");
+  server.send(200, "application/json", "{\"mode\": " + String(config.display.mode) + ", \"until\": " + String(config.display.until) + ", \"intensity\": " + String(config.display.intensity) + "}");
 }
 
 void handleDisplaySet() {
@@ -70,6 +70,10 @@ void handleDisplaySet() {
 
   if (server.arg("until")) {
     config.display.until = server.arg("until").toInt();
+  }
+
+   if (server.arg("intensity")) {
+    config.display.intensity = server.arg("intensity").toInt();
   }
 
   saveConfig();

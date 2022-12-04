@@ -37,7 +37,8 @@ String timeCheck() {
 }
 
 void displayUpdate() {
-    if ((millis() / 1000 - run_seconds) > 30) {
+  P.setIntensity(config.display.intensity);
+  if ((millis() / 1000 - run_seconds) > 30) {
     run_seconds = millis() / 1000;
     time_interval = true;
   }

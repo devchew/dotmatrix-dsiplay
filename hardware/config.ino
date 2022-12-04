@@ -36,6 +36,7 @@ bool loadConfig() {
   }
 
   // store values in blobal config file;
+  config.display.intensity = doc["display"]["intensity"] | 8;
   config.display.mode = doc["display"]["mode"] | 0;
   config.display.until = doc["display"]["until"] | 1669464000;
   config.wifi.passphrase = doc["wifi"]["passphrase"] | "";
@@ -44,6 +45,8 @@ bool loadConfig() {
   Serial.println("Config loaded");
   Serial.println("----");
 
+  Serial.print("config.display.intensity: ");
+  Serial.println(config.display.intensity);
   Serial.print("config.display.mode: ");
   Serial.println(config.display.mode);
   Serial.print("config.display.until: ");
@@ -61,6 +64,7 @@ bool saveConfig() {
   StaticJsonDocument<200> doc;
 
   // copy config to jsondoc
+  doc["display"]["intensity"] = config.display.intensity;
   doc["display"]["mode"] = config.display.mode;
   doc["display"]["until"] = config.display.until;
   doc["wifi"]["passphrase"] = config.wifi.passphrase;
@@ -71,6 +75,8 @@ bool saveConfig() {
 
   Serial.print("config.display.mode: ");
   Serial.println(config.display.mode);
+  Serial.print("config.display.intensity: ");
+  Serial.println(config.display.intensity);
   Serial.print("config.display.until: ");
   Serial.println(config.display.until);
   Serial.print("config.wifi.passphrase: ");
