@@ -19,7 +19,15 @@ String formatTime(unsigned long rawTime) {
 
 String timeCheck() {
   timeClient.update();
-  String data = formatTime(until - timeClient.getEpochTime());
+  String data;
+  //Countdown
+  if (config.display.mode == 0) {
+    data = formatTime(config.display.until - timeClient.getEpochTime());
+  }
+  //Clock
+  if (config.display.mode == 1) {
+    data = formatTime(timeClient.getEpochTime());
+  }
 
 
   data.toCharArray(newMessage, BUF_SIZE);
@@ -36,6 +44,8 @@ void displayUpdate() {
 
   if (time_interval) {
     displayData = timeCheck();
+    Serial.print("Display update: ");
+    Serial.println(displayData);
     time_interval = false;
   }
 

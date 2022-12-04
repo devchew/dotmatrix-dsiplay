@@ -1,5 +1,3 @@
-
-
 bool tryToConnect() {
   int c = 0;
   Serial.println("Waiting for Wifi to connect");
@@ -33,8 +31,8 @@ void handleWiFiScan() {
   server.send(200, "application/json", networksList);
 }
 
-void handleWiFiGetCurrent() {
-  Serial.println("handleWiFiGetCurrent");
+void handleWiFiGet() {
+  Serial.println("handleWiFiGet");
   server.send(200, "application/json", "{\"ssid\": \"" + config.wifi.ssid + "\", \"passphrase\": \"" + config.wifi.passphrase + "\"}");
 }
 
@@ -59,10 +57,31 @@ void handleWifiSet() {
   server.send(200);
 }
 
+void handleDisplayGet() {
+  Serial.println("handleDisplayGet");
+  server.send(200, "application/json", "{\"mode\": \"" + String(config.display.mode) + "\", \"until\": \"" + String(config.display.until) + "\"}");
+}
+
+void handleDisplaySet() {
+  Serial.println("handleDisplaySet");
+  if (server.arg("mode")) {
+    config.display.mode = server.arg("mode").toInt();
+  }
+
+  if (server.arg("until")) {
+    config.display.until = server.arg("until").toInt();
+  }
+
+  saveConfig();
+  server.send(200);
+}
+
 void setupServer() {
   server.on("/api/wifi/scan", HTTP_GET, handleWiFiScan);
   server.on("/api/wifi/set", HTTP_POST, handleWifiSet);
-  server.on("/api/wifi/get", HTTP_GET, handleWiFiGetCurrent);
+  server.on("/api/wifi/get", HTTP_GET, handleWiFiGet);
+  server.on("/api/display/get", HTTP_GET, handleDisplayGet);
+  server.on("/api/display/set", HTTP_POST, handleDisplaySet);
   server.on("/", HTTP_GET, webRoot);
   server.onNotFound(webRoot);
   server.begin();

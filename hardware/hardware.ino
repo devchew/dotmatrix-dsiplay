@@ -29,7 +29,7 @@ struct WifiConfig {
 
 struct DisplayConfig {
   int mode;
-  unsigned long until;
+  int until;
 };
 
 struct HttpConnectionStatus {
@@ -49,7 +49,6 @@ WiFiUDP ntpUDP;
 
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
-unsigned long until = 1669464000;
 
 NTPClient timeClient(ntpUDP, "0.pl.pool.ntp.org", 3600, 60000);
 ESP8266WebServer server(80);

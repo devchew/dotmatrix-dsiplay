@@ -40,13 +40,20 @@ bool loadConfig() {
   config.display.until = doc["display"]["until"] | 1669464000;
   config.wifi.passphrase = doc["wifi"]["passphrase"] | "";
   config.wifi.ssid = doc["wifi"]["ssid"] | "";
-  // strlcpy(config.wifi.passphrase,           // <- destination
-  //         doc["wifi"]["passphrase"] | "",   // <- source
-  //         sizeof(config.wifi.passphrase));  // <- destination's capacity
-
-  // strlcpy(config.wifi.ssid, doc["wifi"]["ssid"] | "", sizeof(config.wifi.ssid));
 
   Serial.println("Config loaded");
+  Serial.println("----");
+
+  Serial.print("config.display.mode: ");
+  Serial.println(config.display.mode);
+  Serial.print("config.display.until: ");
+  Serial.println(config.display.until);
+  Serial.print("config.wifi.passphrase: ");
+  Serial.println(config.wifi.passphrase);
+  Serial.print("config.wifi.ssid: ");
+  Serial.println(config.wifi.ssid);
+
+  Serial.println("----");
   return true;
 }
 
@@ -58,6 +65,20 @@ bool saveConfig() {
   doc["display"]["until"] = config.display.until;
   doc["wifi"]["passphrase"] = config.wifi.passphrase;
   doc["wifi"]["ssid"] = config.wifi.ssid;
+
+  Serial.println("Config saved");
+  Serial.println("----");
+
+  Serial.print("config.display.mode: ");
+  Serial.println(config.display.mode);
+  Serial.print("config.display.until: ");
+  Serial.println(config.display.until);
+  Serial.print("config.wifi.passphrase: ");
+  Serial.println(config.wifi.passphrase);
+  Serial.print("config.wifi.ssid: ");
+  Serial.println(config.wifi.ssid);
+
+  Serial.println("----");
 
   File configFile = LittleFS.open("/config.json", "w");
   if (!configFile) {
