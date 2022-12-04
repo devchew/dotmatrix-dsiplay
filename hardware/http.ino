@@ -3,7 +3,7 @@
 bool tryToConnect() {
   int c = 0;
   Serial.println("Waiting for Wifi to connect");
-  WiFi.begin(wifiConfig.ssid, wifiConfig.passphrase);
+  WiFi.begin(config.wifi.ssid, config.wifi.passphrase);
   while (c < 20) {
     if (WiFi.status() == WL_CONNECTED) { return true; }
     delay(500);
@@ -22,32 +22,6 @@ IPAddress getIpToManage(bool isClient) {
   return WiFi.softAPIP();
 }
 
-WifiConfig loadConfigFromEEPROM() {
-  WifiConfig newConfig;
-  newConfig.ssid = "";
-  for (int i = 0; i < 32; ++i) {
-    if (char(EEPROM.read(i)) == 0) break;
-    newConfig.ssid += char(EEPROM.read(i));
-  }
-  newConfig.passphrase = "";
-  for (int i = 32; i < 96; ++i) {
-    if (char(EEPROM.read(i)) == 0) break;
-    newConfig.passphrase += char(EEPROM.read(i));
-  }
-  return newConfig;
-}
-
-void storeConfigInEEPROM(WifiConfig config) {
-  Serial.println("clearing eeprom");
-  for (int i = 0; i < 96; ++i) { EEPROM.write(i, 0); }
-  for (int i = 0; i < config.ssid.length(); ++i) {
-    EEPROM.write(i, config.ssid[i]);
-  }
-  for (int i = 0; i < config.passphrase.length(); ++i) {
-    EEPROM.write(32 + i, config.passphrase[i]);
-  }
-  EEPROM.commit();
-}
 void handleWiFiScan() {
   Serial.println("handleWiFiScan");
   int n = WiFi.scanNetworks();
@@ -61,7 +35,7 @@ void handleWiFiScan() {
 
 void handleWiFiGetCurrent() {
   Serial.println("handleWiFiGetCurrent");
-  server.send(200, "application/json", "{\"ssid\": \"" + wifiConfig.ssid + "\", \"passphrase\": \"" + wifiConfig.passphrase + "\"}");
+  server.send(200, "application/json", "{\"ssid\": \"" + config.wifi.ssid + "\", \"passphrase\": \"" + config.wifi.passphrase + "\"}");
 }
 
 void handleWifiSet() {
@@ -71,17 +45,17 @@ void handleWifiSet() {
     server.send(400);
     return;
   }
-  wifiConfig.ssid = server.arg("ssid");
-  wifiConfig.passphrase = server.arg("passphrase");
+  config.wifi.ssid = server.arg("ssid");
+  config.wifi.passphrase = server.arg("passphrase");
 
   Serial.println("Store new credentials");
   Serial.print("ssid:");
-  Serial.print(wifiConfig.ssid);
+  Serial.print(config.wifi.ssid);
   Serial.print("pass:");
-  Serial.println(wifiConfig.passphrase);
+  Serial.println(config.wifi.passphrase);
   Serial.println("---");
 
-  storeConfigInEEPROM(wifiConfig);
+  saveConfig();
   server.send(200);
 }
 
@@ -101,18 +75,17 @@ HttpConnectionStatus setupHttp() {
   Serial.println("start soft AP");
   WiFi.softAP(AP_SSID, AP_PASS);
 
-  Serial.println("Load config from eeprom");
-  wifiConfig = loadConfigFromEEPROM();
   Serial.print("ssid:");
-  Serial.print(wifiConfig.ssid);
+  Serial.print(config.wifi.ssid);
   Serial.print("; pass:");
-  Serial.println(wifiConfig.passphrase);
-  
-  Serial.println("tryToConnect");
-  output.client = tryToConnect();
+  Serial.println(config.wifi.passphrase);
+  if (!config.wifi.ssid.isEmpty()) {
+    Serial.println("tryToConnect");
+    output.client = tryToConnect();
+  }
   Serial.println(output.client ? "connected" : "cant connect");
   output.clientIP = getIpToManage(true);
-  output.apIP = getIpToManage(true);
+  output.apIP = getIpToManage(false);
 
   Serial.print("Ip to manage: ");
   Serial.println(output.client ? output.clientIP : output.apIP);

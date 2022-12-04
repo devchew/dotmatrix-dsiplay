@@ -28,3 +28,21 @@ String timeCheck() {
   return data;
 }
 
+void displayUpdate() {
+    if ((millis() / 1000 - run_seconds) > 30) {
+    run_seconds = millis() / 1000;
+    time_interval = true;
+  }
+
+  if (time_interval) {
+    displayData = timeCheck();
+    time_interval = false;
+  }
+
+  displayData.toCharArray(newMessage, BUF_SIZE);
+
+  if (P.displayAnimate()) {
+    strcpy(curMessage, newMessage);
+    P.displayReset();
+  }
+}

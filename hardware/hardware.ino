@@ -6,7 +6,10 @@
 #include <NTPClient.h>
 #include <ESP8266WebServer.h>
 #include <WiFiUdp.h>
-#include <EEPROM.h>
+
+#include <ArduinoJson.h>
+#include "FS.h"
+#include <LittleFS.h>
 
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define MAX_DEVICES 4
@@ -23,13 +26,25 @@ struct WifiConfig {
   String passphrase = emptyString;
 };
 
+
+struct DisplayConfig {
+  int mode;
+  unsigned long until;
+};
+
 struct HttpConnectionStatus {
   bool client = false;
   IPAddress apIP;
   IPAddress clientIP;
 };
 
-WifiConfig wifiConfig;
+struct Config {
+  WifiConfig wifi;
+  DisplayConfig display;
+};
+
+Config config;
+
 WiFiUDP ntpUDP;
 
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
@@ -47,24 +62,22 @@ char curMessage[BUF_SIZE];
 char newMessage[BUF_SIZE];
 bool time_interval = false;
 
-String data;
+String displayData;
 unsigned int run_seconds = 0;
-
-
 
 
 void setup() {
   Serial.begin(115200);
   Serial.println("");
-  Serial.println("Setup EEPROM");
-  EEPROM.begin(512);
   delay(10);
+  mountConfig();
+  loadConfig();
 
   Serial.println("Seutp HTTP");
   HttpConnectionStatus status = setupHttp();
 
   Serial.println("Seup display");
-  setupDisplay();  
+  setupDisplay();
 
 
   Serial.println("Time client begin");
@@ -74,24 +87,10 @@ void setup() {
   sprintf(curMessage, "%s - %d:%d:%d:%d", (status.client ? "Client" : "Host"), IP[0], IP[1], IP[2], IP[3]);
   Serial.print("display set to: ");
   Serial.println(curMessage);
+
 }
 
 void loop() {
   server.handleClient();
-  if ((millis() / 1000 - run_seconds) > 30) {
-    run_seconds = millis() / 1000;
-    time_interval = true;
-  }
-
-  if (time_interval) {
-    data = timeCheck();
-    time_interval = false;
-  }
-
-  data.toCharArray(newMessage, BUF_SIZE);
-
-  if (P.displayAnimate()) {
-    strcpy(curMessage, newMessage);
-    P.displayReset();
-  }
+  displayUpdate();
 }
