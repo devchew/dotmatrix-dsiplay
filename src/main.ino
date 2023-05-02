@@ -32,6 +32,7 @@ struct DisplayConfig {
   int mode;
   int until;
   int intensity = 8;
+  int offset = 0;
 };
 
 struct HttpConnectionStatus {
@@ -67,24 +68,30 @@ String displayData;
 unsigned int run_seconds = 0;
 
 void mountConfig() {
-  Serial.println("Mounting FS...");
+  // Serial.println("Mounting FS...");
 
   if (!LittleFS.begin()) {
-    Serial.println("Failed to mount file system");
+    // Serial.println("Failed to mount file system");
     return;
   }
+  config.display.intensity = 8;
+  config.display.mode = 0;
+  config.display.until = 1669464000;
+  config.display.offset = 0;
+  config.wifi.passphrase = "";
+  config.wifi.ssid = "";
 }
 
 bool loadConfig() {
   File configFile = LittleFS.open("/config.json", "r");
   if (!configFile) {
-    Serial.println("Failed to open config file");
+    // Serial.println("Failed to open config file");
     return false;
   }
 
   size_t size = configFile.size();
   if (size > 1024) {
-    Serial.println("Config file size is too large");
+    // Serial.println("Config file size is too large");
     return false;
   }
 
@@ -99,7 +106,7 @@ bool loadConfig() {
   StaticJsonDocument<200> doc;
   auto error = deserializeJson(doc, buf.get());
   if (error) {
-    Serial.println("Failed to parse config file");
+    // Serial.println("Failed to parse config file");
     return false;
   }
 
@@ -107,24 +114,27 @@ bool loadConfig() {
   config.display.intensity = doc["display"]["intensity"] | 8;
   config.display.mode = doc["display"]["mode"] | 0;
   config.display.until = doc["display"]["until"] | 1669464000;
+  config.display.offset = doc["display"]["offset"] | 0;
   config.wifi.passphrase = doc["wifi"]["passphrase"] | "";
   config.wifi.ssid = doc["wifi"]["ssid"] | "";
 
-  Serial.println("Config loaded");
-  Serial.println("----");
+  // Serial.println("Config loaded");
+  // Serial.println("----");
 
-  Serial.print("config.display.intensity: ");
-  Serial.println(config.display.intensity);
-  Serial.print("config.display.mode: ");
-  Serial.println(config.display.mode);
-  Serial.print("config.display.until: ");
-  Serial.println(config.display.until);
-  Serial.print("config.wifi.passphrase: ");
-  Serial.println(config.wifi.passphrase);
-  Serial.print("config.wifi.ssid: ");
-  Serial.println(config.wifi.ssid);
+  // Serial.print("config.display.intensity: ");
+  // Serial.println(config.display.intensity);
+  // Serial.print("config.display.mode: ");
+  // Serial.println(config.display.mode);
+  // Serial.print("config.display.until: ");
+  // Serial.println(config.display.until);
+  // Serial.print("config.display.offset: ");
+  // Serial.println(config.display.offset);
+  // Serial.print("config.wifi.passphrase: ");
+  // Serial.println(config.wifi.passphrase);
+  // Serial.print("config.wifi.ssid: ");
+  // Serial.println(config.wifi.ssid);
 
-  Serial.println("----");
+  // Serial.println("----");
   return true;
 }
 
@@ -135,48 +145,51 @@ bool saveConfig() {
   doc["display"]["intensity"] = config.display.intensity;
   doc["display"]["mode"] = config.display.mode;
   doc["display"]["until"] = config.display.until;
+  doc["display"]["offset"] = config.display.offset;
   doc["wifi"]["passphrase"] = config.wifi.passphrase;
   doc["wifi"]["ssid"] = config.wifi.ssid;
 
-  Serial.println("Config saved");
-  Serial.println("----");
+  // Serial.println("Config saved");
+  // Serial.println("----");
 
-  Serial.print("config.display.mode: ");
-  Serial.println(config.display.mode);
-  Serial.print("config.display.intensity: ");
-  Serial.println(config.display.intensity);
-  Serial.print("config.display.until: ");
-  Serial.println(config.display.until);
-  Serial.print("config.wifi.passphrase: ");
-  Serial.println(config.wifi.passphrase);
-  Serial.print("config.wifi.ssid: ");
-  Serial.println(config.wifi.ssid);
+  // Serial.print("config.display.mode: ");
+  // Serial.println(config.display.mode);
+  // Serial.print("config.display.intensity: ");
+  // Serial.println(config.display.intensity);
+  // Serial.print("config.display.until: ");
+  // Serial.println(config.display.until);
+  // Serial.print("config.display.offset: ");
+  // Serial.println(config.display.offset);
+  // Serial.print("config.wifi.passphrase: ");
+  // Serial.println(config.wifi.passphrase);
+  // Serial.print("config.wifi.ssid: ");
+  // Serial.println(config.wifi.ssid);
 
-  Serial.println("----");
+  // Serial.println("----");
 
   File configFile = LittleFS.open("/config.json", "w");
   if (!configFile) {
-    Serial.println("Failed to open config file for writing");
+    // Serial.println("Failed to open config file for writing");
     return false;
   }
 
   serializeJson(doc, configFile);
-  Serial.println("Store successfully");
+  // Serial.println("Store successfully");
   return true;
 }
 
 bool tryToConnect() {
   int c = 0;
-  Serial.println("Waiting for Wifi to connect");
+  // Serial.println("Waiting for Wifi to connect");
   WiFi.begin(config.wifi.ssid, config.wifi.passphrase);
   while (c < 20) {
     if (WiFi.status() == WL_CONNECTED) { return true; }
     delay(500);
-    Serial.print(WiFi.status());
+    // Serial.print(WiFi.status());
     c++;
   }
-  Serial.println("");
-  Serial.println("Connect timed out");
+  // Serial.println("");
+  // Serial.println("Connect timed out");
   return false;
 }
 
@@ -188,7 +201,7 @@ IPAddress getIpToManage(bool isClient) {
 }
 
 void handleWiFiScan() {
-  Serial.println("handleWiFiScan");
+  // Serial.println("handleWiFiScan");
   int n = WiFi.scanNetworks();
   String networksList = "{\"ssids\":[";
   for (int i = 0; i < n; ++i) {
@@ -199,12 +212,12 @@ void handleWiFiScan() {
 }
 
 void handleWiFiGet() {
-  Serial.println("handleWiFiGet");
+  // Serial.println("handleWiFiGet");
   server.send(200, "application/json", "{\"ssid\": \"" + config.wifi.ssid + "\", \"passphrase\": \"" + config.wifi.passphrase + "\"}");
 }
 
 void handleWifiSet() {
-  Serial.println("handleWifiSet");
+  // Serial.println("handleWifiSet");
 
   if (!server.arg("ssid")) {
     server.send(400);
@@ -213,24 +226,24 @@ void handleWifiSet() {
   config.wifi.ssid = server.arg("ssid");
   config.wifi.passphrase = server.arg("passphrase");
 
-  Serial.println("Store new credentials");
-  Serial.print("ssid:");
-  Serial.print(config.wifi.ssid);
-  Serial.print("pass:");
-  Serial.println(config.wifi.passphrase);
-  Serial.println("---");
+  // Serial.println("Store new credentials");
+  // Serial.print("ssid:");
+  // Serial.print(config.wifi.ssid);
+  // Serial.print("pass:");
+  // Serial.println(config.wifi.passphrase);
+  // Serial.println("---");
 
   saveConfig();
   server.send(200);
 }
 
 void handleDisplayGet() {
-  Serial.println("handleDisplayGet");
-  server.send(200, "application/json", "{\"mode\": " + String(config.display.mode) + ", \"until\": " + String(config.display.until) + ", \"intensity\": " + String(config.display.intensity) + "}");
+  // Serial.println("handleDisplayGet");
+  server.send(200, "application/json", "{\"mode\": " + String(config.display.mode) + ", \"until\": " + String(config.display.until) + ", \"offset\": " + String(config.display.offset) + ", \"intensity\": " + String(config.display.intensity) + "}");
 }
 
 void handleDisplaySet() {
-  Serial.println("handleDisplaySet");
+  // Serial.println("handleDisplaySet");
   if (server.arg("mode")) {
     config.display.mode = server.arg("mode").toInt();
   }
@@ -239,8 +252,12 @@ void handleDisplaySet() {
     config.display.until = server.arg("until").toInt();
   }
 
-   if (server.arg("intensity")) {
+  if (server.arg("intensity")) {
     config.display.intensity = server.arg("intensity").toInt();
+  }
+   
+  if (server.arg("offset")) {
+    config.display.offset = server.arg("offset").toInt();
   }
 
   saveConfig();
@@ -274,25 +291,25 @@ HttpConnectionStatus setupHttp() {
   HttpConnectionStatus output;
   WiFi.mode(WIFI_AP_STA);
 
-  Serial.println("start soft AP");
+  // Serial.println("start soft AP");
   WiFi.softAP(AP_SSID, AP_PASS);
 
-  Serial.print("ssid:");
-  Serial.print(config.wifi.ssid);
-  Serial.print("; pass:");
-  Serial.println(config.wifi.passphrase);
+  // Serial.print("ssid:");
+  // Serial.print(config.wifi.ssid);
+  // Serial.print("; pass:");
+  // Serial.println(config.wifi.passphrase);
   if (!config.wifi.ssid.isEmpty()) {
-    Serial.println("tryToConnect");
+    // Serial.println("tryToConnect");
     output.client = tryToConnect();
   }
-  Serial.println(output.client ? "connected" : "cant connect");
+  // Serial.println(output.client ? "connected" : "cant connect");
   output.clientIP = getIpToManage(true);
   output.apIP = getIpToManage(false);
 
-  Serial.print("Ip to manage: ");
-  Serial.println(output.client ? output.clientIP : output.apIP);
+  // Serial.print("Ip to manage: ");
+  // Serial.println(output.client ? output.clientIP : output.apIP);
 
-  Serial.println("Setup ap");
+  // Serial.println("Setup ap");
   setupServer();
 
   return output;
@@ -338,6 +355,7 @@ String timeCheck() {
 
 void displayUpdate() {
   P.setIntensity(config.display.intensity);
+  timeClient.setTimeOffset(config.display.offset);
   if ((millis() / 1000 - run_seconds) > 30) {
     run_seconds = millis() / 1000;
     time_interval = true;
@@ -345,8 +363,8 @@ void displayUpdate() {
 
   if (time_interval) {
     displayData = timeCheck();
-    Serial.print("Display update: ");
-    Serial.println(displayData);
+    // Serial.print("Display update: ");
+    // Serial.println(displayData);
     time_interval = false;
   }
 
@@ -359,26 +377,26 @@ void displayUpdate() {
 }
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("");
+  // Serial.begin(115200);
+  // Serial.println("");
   delay(10);
   mountConfig();
   loadConfig();
 
-  Serial.println("Seutp HTTP");
+  // Serial.println("Seutp HTTP");
   HttpConnectionStatus status = setupHttp();
 
-  Serial.println("Seup display");
+  // Serial.println("Seup display");
   setupDisplay();
 
 
-  Serial.println("Time client begin");
+  // Serial.println("Time client begin");
   timeClient.begin();
 
   IPAddress IP = status.client ? status.clientIP : status.apIP;
   sprintf(curMessage, "%s - %d:%d:%d:%d", (status.client ? "Client" : "Host"), IP[0], IP[1], IP[2], IP[3]);
-  Serial.print("display set to: ");
-  Serial.println(curMessage);
+  // Serial.print("display set to: ");
+  // Serial.println(curMessage);
 
 }
 

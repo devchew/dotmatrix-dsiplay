@@ -6,7 +6,6 @@ export const Header = () => (
 		<nav class="menu">
 			<Link activeClassName="menu__link--active" class="menu__link winUp" href="/">Home</Link>
 			<Link activeClass="menu__link--active" class="menu__link winUp" href="/wifi">WiFi</Link>
-			<Link activeClass="menu__link--active" class="menu__link winUp" href="/display">Display</Link>
 		</nav>
 	</header>
 );

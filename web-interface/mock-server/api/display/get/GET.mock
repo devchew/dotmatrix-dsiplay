@@ -5,5 +5,6 @@ Access-Control-Allow-Origin: *
 {
    "mode": 0,
    "until": 1670241600,
-   "intensity": 8
+   "intensity": 8,
+   "offset": 3600
 }
