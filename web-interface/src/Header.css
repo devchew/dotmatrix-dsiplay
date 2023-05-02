@@ -1,8 +1,12 @@
 header {
     border-bottom: 1px solid #333;
 }
-nav a {
+.menu__link {   
     padding: 1rem;
-    background-color: #dfdfdf;
     display: inline-block;
+    color:#333;
+}
+.menu__link:hover {
+    color:#333;
+
 }

@@ -3,10 +3,10 @@ import { Link } from "preact-router";
 
 export const Header = () => (
 	<header>
-		<nav>
-			<Link activeClassName="active" href="/">Home</Link>
-			<Link activeClassName="active" href="/wifi">WiFi</Link>
-			<Link activeClassName="active" href="/display">Display</Link>
+		<nav class="menu">
+			<Link activeClassName="menu__link--active" class="menu__link winUp" href="/">Home</Link>
+			<Link activeClass="menu__link--active" class="menu__link winUp" href="/wifi">WiFi</Link>
+			<Link activeClass="menu__link--active" class="menu__link winUp" href="/display">Display</Link>
 		</nav>
 	</header>
 );

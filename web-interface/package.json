@@ -8,7 +8,7 @@
     "dev": "webpack serve --config config/webpack.dev.js --open",
     "build": "webpack --config config/webpack.prod.js && npm run copyToHardware",
     "mockServer": "mockserver -p 2137 -m mock-server",
-    "copyToHardware": "node config/copyToHardware.js"
+    "copyToHardware": "cp -r ./dist/. ./../data/."
   },
   "author": "",
   "license": "ISC",
@@ -28,8 +28,6 @@
     "css-loader": "6.7.2",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "file-loader": "6.2.0",
-    "html-inline-css-webpack-plugin": "^1.11.1",
-    "html-inline-script-webpack-plugin": "^3.1.0",
     "html-minimizer-webpack-plugin": "^4.3.0",
     "html-webpack-plugin": "5.5.0",
     "mini-css-extract-plugin": "^2.7.1",

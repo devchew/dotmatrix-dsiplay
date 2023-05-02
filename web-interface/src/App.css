@@ -1,7 +1,93 @@
+html {
+  color: #222;
+}
+
 main {
-    max-width: 800px;
-    margin: auto;
+  max-width: 800px;
+  margin: auto;
 }
 button {
-    cursor: pointer;
+  cursor: pointer;
+}
+
+.winUp {
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf,
+    inset -2px -2px grey, inset 2px 2px #fff;
+}
+
+button:focus,
+input[type="reset"]:focus,
+input[type="submit"]:focus {
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+}
+
+button,
+input[type="reset"],
+input[type="submit"] {
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+button,
+input[type="reset"],
+input[type="submit"] {
+  border: none;
+  border-radius: 0;
+  box-sizing: border-box;
+  min-height: 23px;
+  min-width: 75px;
+  padding: 0 12px;
+}
+button:not(:disabled):active,
+input[type="reset"]:not(:disabled):active,
+input[type="submit"]:not(:disabled):active {
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a,
+    inset -2px -2px #dfdfdf, inset 2px 2px grey;
+  padding: 2px 11px 0 13px;
+}
+
+::-webkit-scrollbar {
+  width: 16px;
+}
+::-webkit-scrollbar:horizontal {
+  height: 17px;
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--button-face);
+}
+
+::-webkit-scrollbar-track {
+  background-image: svg-load("./icon/scrollbar-background.svg");
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--button-face);
+  box-shadow: var(--border-raised-outer), var(--border-raised-inner);
+}
+
+::-webkit-scrollbar-button:horizontal:start:decrement,
+::-webkit-scrollbar-button:horizontal:end:increment,
+::-webkit-scrollbar-button:vertical:start:decrement,
+::-webkit-scrollbar-button:vertical:end:increment {
+  display: block;
+}
+
+::-webkit-scrollbar-button:vertical:start {
+  height: 17px;
+  background-image: svg-load("./icon/button-up.svg");
+}
+::-webkit-scrollbar-button:vertical:end {
+  height: 17px;
+  background-image: svg-load("./icon/button-down.svg");
+}
+::-webkit-scrollbar-button:horizontal:start {
+  width: 16px;
+  background-image: svg-load("./icon/button-left.svg");
+}
+::-webkit-scrollbar-button:horizontal:end {
+  width: 16px;
+  background-image: svg-load("./icon/button-right.svg");
 }
